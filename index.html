@@ -1,0 +1,696 @@
+import React, { useState, useEffect } from 'react';
+
+// --- 熊之卷：考前教材資料 (文字條列版) ---
+const tutorials = [
+  {
+    id: 1, title: "第一課：清理 VS 處理", icon: "🧹",
+    content: [
+      "🐻 清理 (Clean)：把垃圾挑掉，例如處理空值、過濾雜訊。",
+      "🐻 處理 (Transform/Preprocess)：換成模型看得懂的格式，例如型別轉換、標準化、編碼。",
+      "⚠️ 陷阱提醒：處理空值(遺漏值補全)屬於「清理」階段，不是特徵工程！"
+    ]
+  },
+  {
+    id: 2, title: "第二課：類別編碼大補帖", icon: "🏷️",
+    content: [
+      "🔢 標籤編碼 (Label Encoding)：將類別轉成整數(1,2,3...)。只適用於『有序類別』(如學歷高低)。",
+      "🔥 獨熱編碼 (One-hot Encoding)：展開成0/1獨立欄位。適用於『無序類別』(如城市)。",
+      "🎯 目標編碼 (Target Encoding)：用目標變數的統計量取代類別。專治『高基數』(如上千個郵遞區號)。",
+      "⚠️ 陷阱提醒：高基數絕對不能用 One-hot，會造成維度災難！"
+    ]
+  },
+  {
+    id: 3, title: "第三課：數值縮放與分箱", icon: "📏",
+    content: [
+      "📊 Min-Max (最小-最大)：壓縮到 [0,1] 之間，對『極端值』超敏感！",
+      "📊 Z-score (標準化)：平均為0，標準差為1。適合常態分佈資料。",
+      "🛡️ 穩健標準化 (Robust Scaling)：用中位數與四分位距(IQR)。專門對付『極端值』(如月薪一億的老闆)！",
+      "📦 分箱 (Binning)：把連續數值(年齡)切成離散區間(青年/中年)，讓模型更穩定、更好解釋。"
+    ]
+  },
+  {
+    id: 4, title: "第四課：特徵工程魔法", icon: "✨",
+    content: [
+      "➕ 交互特徵：特徵相乘或相除(如: 頻率 x 金額)，抓出非線性關係。",
+      "⏳ 時間特徵：轉出星期、是否假日。小心『資料洩漏』(用未來預測現在)。",
+      "👥 聚合特徵：算出群組統計量(如: 近3個月平均消費)。",
+      "🪄 資料增強 (SMOTE)：遇到『極度不平衡資料』(如: 抓1%詐騙犯)，用 SMOTE 合成少數樣本救回來！"
+    ]
+  },
+  {
+    id: 5, title: "第五課：特徵選擇三兄弟", icon: "✂️",
+    content: [
+      "🏃‍♂️ 過濾法 (Filter)：『不靠模型』，純看統計量(如: 相關係數、卡方檢定)。最快、最粗。",
+      "🐌 包裝法 (Wrapper)：丟進模型看分數決定去留(如: RFE、前向選擇)。最準、最慢、易過擬合。",
+      "🤖 嵌入法 (Embedded)：訓練同時挑特徵(如: 決策樹重要度、Lasso L1正則化)。折衷且依賴模型。"
+    ]
+  },
+  {
+    id: 6, title: "第六課：分散式處理四大天王", icon: "⚡",
+    content: [
+      "🐘 Hadoop (MapReduce)：老牌『批次處理』，寫入硬碟，慢但很穩。",
+      "✨ Spark：『記憶體』內運算，速度超快！批次為主，微批次串流。",
+      "🌊 Flink：為『即時串流』而生！刷卡防詐騙、秒級警報必選它！",
+      "🌉 Beam：統一批次與串流的『抽象層』，寫一次程式可跨平台執行。"
+    ]
+  }
+];
+
+// --- 熊熊圖解教室：視覺化超難記名詞 ---
+const visualConcepts = [
+  {
+    id: "interaction",
+    title: "交互特徵 (Interaction)",
+    chapter: "特徵工程",
+    theme: "bg-blue-100 border-blue-300",
+    textTheme: "text-blue-800",
+    visual: (
+      <div className="flex items-center justify-center space-x-4 text-5xl my-6">
+        <div className="flex flex-col items-center"><span className="text-6xl">🛒</span><span className="text-sm font-bold mt-2">頻率</span></div>
+        <span className="font-black text-blue-500">×</span>
+        <div className="flex flex-col items-center"><span className="text-6xl">💰</span><span className="text-sm font-bold mt-2">單價</span></div>
+        <span className="font-black text-blue-500">=</span>
+        <div className="flex flex-col items-center"><span className="text-7xl animate-bounce">📈</span><span className="text-sm font-bold mt-2 text-blue-600">總價值</span></div>
+      </div>
+    ),
+    description: "單看「購買次數」或「單價」看不出潛力？把它們相乘或相除，衍生出新的「總貢獻度」！這就是交互特徵，幫模型找出隱藏的非線性關係。",
+    bearTip: "🐻 白話文：就像把草莓跟牛奶打在一起，變成更好喝的草莓牛奶！"
+  },
+  {
+    id: "smote",
+    title: "SMOTE (合成少數過採樣)",
+    chapter: "特徵工程",
+    theme: "bg-purple-100 border-purple-300",
+    textTheme: "text-purple-800",
+    visual: (
+      <div className="flex flex-col items-center justify-center space-y-4 my-6">
+        <div className="flex items-center space-x-2 text-4xl">
+          <span>🦊</span> <span className="text-sm font-bold mx-2">VS</span> <span>🐰🐰🐰🐰🐰</span>
+        </div>
+        <div className="text-2xl font-black text-purple-500">⬇️ SMOTE 魔法 ⬇️</div>
+        <div className="flex items-center space-x-2 text-4xl bg-purple-200 p-3 rounded-2xl">
+          <span>🦊<span className="opacity-50">🦊🦊</span></span> <span className="text-sm font-bold mx-2">VS</span> <span>🐰🐰🐰🐰🐰</span>
+        </div>
+      </div>
+    ),
+    description: "遇到極度不平衡的資料（例如抓1%的詐騙犯🦊），模型會學不好。SMOTE 會自動分析少數樣本，並「無中生有」合成相似的分身，讓兩邊數量平衡！",
+    bearTip: "🐻 白話文：壞人太少難訓練？用影分身之術複製幾個類似的壞人來給模型練習！"
+  },
+  {
+    id: "filter",
+    title: "過濾法 (Filter Method)",
+    chapter: "特徵選擇",
+    theme: "bg-stone-200 border-stone-400",
+    textTheme: "text-stone-800",
+    visual: (
+      <div className="flex items-center justify-center space-x-4 text-5xl my-8">
+        <div className="flex flex-col items-center"><span className="text-6xl">📊</span><span className="text-sm font-bold mt-2">100個特徵</span></div>
+        <span className="font-black text-stone-500 animate-pulse">➡️</span>
+        <div className="flex flex-col items-center relative">
+          <span className="text-7xl">🐻</span>
+          <span className="absolute -bottom-2 -right-4 text-5xl">🔎</span>
+          <span className="text-sm font-bold mt-2">純看統計量</span>
+        </div>
+        <span className="font-black text-stone-500 animate-pulse">➡️</span>
+        <div className="flex flex-col items-center"><span className="text-6xl">🗑️</span><span className="text-sm font-bold mt-2">丟掉垃圾</span></div>
+      </div>
+    ),
+    description: "特徵太多時，先用「過濾法」快速篩選。它的特色是完全「不丟進機器學習模型」，純粹用數學統計（如相關係數、卡方檢定）來判斷特徵有沒有用。",
+    bearTip: "🐻 白話文：不用麻煩大腦(模型)去跑，光看外表(統計分數)就能決定去留，最快但也最粗糙！"
+  },
+  {
+    id: "spark",
+    title: "Apache Spark",
+    chapter: "分散式框架",
+    theme: "bg-yellow-100 border-yellow-400",
+    textTheme: "text-yellow-800",
+    visual: (
+      <div className="flex items-center justify-center space-x-6 text-6xl my-8">
+        <div className="flex flex-col items-center">
+          <div className="relative">
+             <span className="text-8xl">🐻</span>
+             <span className="absolute -top-4 -right-4 text-5xl animate-spin">⚡</span>
+          </div>
+          <span className="text-xl font-black mt-2 text-yellow-600 bg-white px-3 py-1 rounded-full border-2 border-yellow-400 shadow-sm">In-memory!</span>
+        </div>
+        <span className="text-7xl">🧠</span>
+      </div>
+    ),
+    description: "傳統 Hadoop 運算時要把資料反覆寫入硬碟(超慢)。Spark 最大賣點就是「記憶體內運算 (In-memory Processing)」，速度直接提升上百倍！主攻批次與微批次串流。",
+    bearTip: "🐻 白話文：把要處理的資料全攤在大桌子上(記憶體)算，不用一直跑去保險箱(硬碟)拿檔案！"
+  },
+  {
+    id: "flink",
+    title: "Apache Flink",
+    chapter: "分散式框架",
+    theme: "bg-cyan-100 border-cyan-400",
+    textTheme: "text-cyan-800",
+    visual: (
+      <div className="flex items-center justify-center space-x-2 text-7xl my-8 overflow-hidden rounded-2xl bg-cyan-50 border-4 border-cyan-200 p-4">
+        <div className="animate-pulse">💧</div>
+        <div className="relative animate-bounce">
+           <span>🏄‍♂️</span>
+           <span className="absolute -bottom-4 right-0 text-3xl">🐻</span>
+        </div>
+        <div className="animate-pulse delay-75">🌊</div>
+        <div className="animate-pulse delay-150">🌊</div>
+      </div>
+    ),
+    description: "為「無邊界、不間斷的即時串流 (Real-time Streaming)」而生。延遲極低(毫秒級)，最適合應用在：信用卡一刷，當下立刻判斷是不是盜刷的防詐騙系統。",
+    bearTip: "🐻 白話文：永遠在浪頭上衝浪！資料來一滴就馬上處理一滴，不累積、絕對零延遲！"
+  },
+  {
+    id: "airflow",
+    title: "Apache Airflow",
+    chapter: "管線自動化工具",
+    theme: "bg-teal-100 border-teal-400",
+    textTheme: "text-teal-800",
+    visual: (
+      <div className="flex items-center justify-center space-x-4 my-8">
+        <div className="text-6xl animate-bounce">⏱️</div>
+        <div className="flex flex-col items-center">
+           <span className="text-8xl">🐻</span>
+           <span className="text-lg font-black mt-2 text-teal-700 bg-white px-4 py-1 rounded-full shadow-sm border-2 border-teal-300">總指揮官</span>
+        </div>
+        <div className="flex flex-col space-y-2 text-2xl font-bold text-slate-700">
+           <span className="bg-teal-200 px-4 py-2 rounded-xl flex items-center gap-2"><span>✅</span> 1. 抓資料</span>
+           <span className="bg-teal-300 px-4 py-2 rounded-xl flex items-center gap-2"><span>⏳</span> 2. 訓練模型</span>
+        </div>
+      </div>
+    ),
+    description: "實際的資料專案包含很多步驟（每天定時抓資料、清洗、訓練）。Airflow 負責編排、排程與監控這整條流水線 (Pipeline)，出錯了還會自動重試或發信通知！",
+    bearTip: "🐻 白話文：鬧鐘 + 行事曆 + 工頭的集合體！負責叫大家起床按順序工作。"
+  },
+  {
+    id: "robust",
+    title: "穩健標準化 (Robust Scaling)",
+    chapter: "數值縮放",
+    theme: "bg-rose-100 border-rose-400",
+    textTheme: "text-rose-800",
+    visual: (
+      <div className="flex items-end justify-center space-x-4 my-8 relative">
+         <span className="text-5xl">🐻</span>
+         <span className="text-5xl">🐻</span>
+         <span className="text-5xl">🐻</span>
+         <div className="flex flex-col items-center z-10">
+            <span className="text-7xl">👑🐻</span>
+            <span className="text-sm font-black text-rose-600 bg-white px-2 rounded-md mt-1">月薪一億</span>
+         </div>
+         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span className="text-4xl font-black text-rose-400 bg-white/80 px-4 py-2 rounded-full border-4 border-rose-400 animate-pulse transform -rotate-12">🛡️ 中位數防護罩</span>
+         </div>
+      </div>
+    ),
+    description: "一般的標準化很容易被極端的離群值（例如全公司只有老闆月薪一億）拉歪平均數。穩健標準化改用「中位數與四分位距」，完全無視極端值的干擾！",
+    bearTip: "🐻 白話文：戴上防護罩，不受那些超級離群值（大老闆）的影響！"
+  },
+  {
+    id: "target_encoding",
+    title: "目標編碼 (Target Encoding)",
+    chapter: "類別編碼",
+    theme: "bg-fuchsia-100 border-fuchsia-400",
+    textTheme: "text-fuchsia-800",
+    visual: (
+      <div className="flex items-center justify-center space-x-2 text-2xl my-8">
+        <div className="flex flex-col text-sm font-bold bg-white p-3 rounded-xl border-2 border-fuchsia-300 shadow-sm">
+           <span>郵遞區號 100</span>
+           <span>郵遞區號 101</span>
+           <span className="text-slate-400">...(上千個)</span>
+        </div>
+        <span className="text-4xl animate-pulse text-fuchsia-500">➡️</span>
+        <div className="relative mx-2">
+           <span className="text-7xl">🐻</span>
+           <span className="absolute -bottom-2 -right-2 text-4xl">🎯</span>
+        </div>
+        <span className="text-4xl animate-pulse text-fuchsia-500">➡️</span>
+        <div className="flex flex-col text-sm font-bold bg-fuchsia-200 p-3 rounded-xl border-2 border-fuchsia-400 shadow-sm">
+           <span>房價平均 0.8</span>
+           <span>房價平均 0.2</span>
+           <span className="text-fuchsia-800">1 個欄位搞定!</span>
+        </div>
+      </div>
+    ),
+    description: "遇到上千個「郵遞區號」這種高基數特徵，千萬不能用 One-hot，否則會多出 1000 個欄位引發維度災難！改用「目標編碼」，直接用答案的平均機率來取代類別。",
+    bearTip: "🐻 白話文：直接把地名換成該地區的「平均房價」或「平均犯罪率」，一格解決！"
+  },
+  {
+    id: "encoding_compare",
+    title: "Label vs One-hot 編碼",
+    chapter: "類別編碼",
+    theme: "bg-orange-100 border-orange-400",
+    textTheme: "text-orange-800",
+    visual: (
+      <div className="flex flex-col w-full px-4 space-y-4 my-4 text-sm md:text-base">
+         <div className="bg-white p-3 rounded-xl border-2 border-orange-300 shadow-sm">
+            <div className="font-black text-orange-700 mb-1">🥇 Label Encoding (有順序)</div>
+            <div className="flex items-center justify-between font-bold text-slate-600">
+               <span>國小 ➡️ 1</span> <span>國中 ➡️ 2</span> <span>高中 ➡️ 3</span>
+            </div>
+         </div>
+         <div className="bg-orange-200 p-3 rounded-xl border-2 border-orange-400 shadow-sm">
+            <div className="font-black text-orange-800 mb-1">🔥 One-hot Encoding (無順序)</div>
+            <div className="flex items-center justify-between font-bold text-slate-700 text-xs md:text-sm">
+               <span>台北 ➡️ [1, 0, 0]</span> <span>台中 ➡️ [0, 1, 0]</span>
+            </div>
+         </div>
+      </div>
+    ),
+    description: "「標籤編碼(Label)」給定整數大小，只適合『有高低順序』的資料（國小=1, 國中=2）。「獨熱編碼(One-hot)」攤平成 0/1，適合『沒有順序』的資料（台北、台中）。",
+    bearTip: "🐻 白話文：有大小長幼之分的排隊領號碼牌(Label)，平起平坐的就各自開一條專屬通道(One-hot)！"
+  }
+];
+
+// --- 測驗題庫資料 ---
+const questions = [
+  {
+    id: 1, text: "小熊發現資料裡有月薪一億的大老闆，導致全公司薪水常態化後黏在一起，該用哪種方法縮放特徵？",
+    options: ["Min-Max 正規化", "Z-score 標準化", "穩健標準化 (Robust Scaling)", "對數轉換"],
+    correct: 2, explanation: "穩健標準化 (Robust Scaling) 拋棄了易受影響的平均數，改用中位數與 IQR，是專門對付極端值的終極武器！"
+  },
+  {
+    id: 2, text: "要處理包含1000個不同「郵遞區號」的特徵時，小熊「絕對不能」用哪種編碼方法？",
+    options: ["標籤編碼 (Label Encoding)", "目標編碼 (Target Encoding)", "獨熱編碼 (One-hot Encoding)", "頻率編碼 (Frequency Encoding)"],
+    correct: 2, explanation: "這是高基數(High Cardinality)欄位，用 One-hot 會暴增1000個欄位，導致維度災難！建議改用 Target Encoding。"
+  },
+  {
+    id: 3, text: "小熊要處理「信用卡盜刷資料（盜刷1筆：正常999筆）」這種極度不平衡的狀況，該用什麼神技？",
+    options: ["Min-Max 縮放", "SMOTE (合成少數過採樣)", "K-Means 分箱", "獨熱編碼"],
+    correct: 1, explanation: "SMOTE (Synthetic Minority Oversampling Technique) 是處理不平衡資料、自動合成少數類別樣本的神器！"
+  },
+  {
+    id: 4, text: "老闆要求做一個「當下一刷卡就立刻警報」的即時防詐騙系統，小熊該幫他選哪種分散式框架？",
+    options: ["Apache Hadoop", "Apache Flink", "Apache Airflow", "資料倉儲"],
+    correct: 1, explanation: "看到「即時、當下立刻」，就要選原生支援即時串流(Real-time Streaming)的 Apache Flink。Hadoop 只能做批次。"
+  },
+  {
+    id: 5, text: "小熊想「不靠模型」，純粹用統計的「相關係數」來快速篩選特徵，這叫做什麼特徵選擇法？",
+    options: ["過濾法 (Filter Method)", "包裝法 (Wrapper Method)", "嵌入法 (Embedded Method)", "PCA 降維"],
+    correct: 0, explanation: "過濾法(Filter)特色就是「不丟進模型訓練」，純粹看皮爾森相關係數或卡方檢定等統計量來篩選，最快但也最粗糙。"
+  },
+  {
+    id: 6, text: "處理「教育程度（國小、國中、高中...）」這種有明顯高低順序的資料，最適合哪種編碼？",
+    options: ["獨熱編碼 (One-hot Encoding)", "標籤編碼 (Label Encoding)", "目標編碼 (Target Encoding)", "哈希編碼 (Hash Encoding)"],
+    correct: 1, explanation: "學歷屬於「有序類別(Ordinal Variable)」，適合用 Label Encoding 轉成 1,2,3，保留其大小順序的邏輯。"
+  },
+  {
+    id: 7, text: "小熊將「消費頻率」與「平均消費金額」相乘，衍生出「年度總消費」這個新欄位，這屬於哪種特徵工程？",
+    options: ["時間特徵", "聚合特徵", "交互特徵 (Interaction Feature)", "分箱"],
+    correct: 2, explanation: "透過現有特徵間的數學運算（如乘積、除法）產生新特徵，稱為交互特徵，能幫模型抓出非線性關係。"
+  },
+  {
+    id: 8, text: "哪一種分散式框架的特色是採用「記憶體內運算 (In-memory)」？",
+    options: ["Apache Flink", "Apache Beam", "Apache Spark", "Apache Airflow"],
+    correct: 2, explanation: "Apache Spark 的最大賣點就是 In-memory Processing，速度極快，且內建 MLlib 可以直接做機器學習。"
+  },
+  {
+    id: 9, text: "小熊在做目標編碼 (Target Encoding) 時，最需要小心防範哪種可怕的問題？",
+    options: ["維度災難", "資料稀疏性", "資料洩漏 (Data Leakage)", "記憶體不足"],
+    correct: 2, explanation: "目標編碼用到「目標答案(Target)」來計算平均，很容易不小心把測試集的答案也算進去，引發嚴重的資料洩漏作弊行為！"
+  },
+  {
+    id: 10, text: "資料處理管線中，把大任務切碎、定期啟動，並確保「當掉時能自動重試」，這需要哪種管線工具來指揮？",
+    options: ["Apache Airflow", "Apache Hadoop", "SMOTE", "Redis"],
+    correct: 0, explanation: "Apache Airflow 是最著名的資料處理管線(Pipeline)自動化排程與監控工具，適合大規模複雜協作。"
+  }
+];
+
+export default function BearGame() {
+  const [gameState, setGameState] = useState('start'); // start, tutorial, gallery, playing, result, end
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [currentTutorialIndex, setCurrentTutorialIndex] = useState(0);
+  const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [hp, setHp] = useState(3);
+  const [bearEmotion, setBearEmotion] = useState('🐻'); 
+  const [feedback, setFeedback] = useState(null);
+
+  const [shuffledQuestions, setShuffledQuestions] = useState([]);
+
+  const initGame = () => {
+    const shuffled = [...questions].sort(() => Math.random() - 0.5);
+    setShuffledQuestions(shuffled);
+    setCurrentQIndex(0);
+    setScore(0);
+    setHp(3);
+    setBearEmotion('🐻');
+    setGameState('playing');
+  };
+
+  const handleAnswer = (selectedIndex) => {
+    const currentQuestion = shuffledQuestions[currentQIndex];
+    const isCorrect = selectedIndex === currentQuestion.correct;
+
+    if (isCorrect) {
+      setScore(prev => prev + 10);
+      setBearEmotion('🍯'); 
+      setFeedback({
+        isCorrect: true,
+        msg: "太棒了！小熊吃到一口甜甜的蜂蜜 🍯",
+        explanation: currentQuestion.explanation
+      });
+    } else {
+      setHp(prev => prev - 1);
+      setBearEmotion('🤕'); 
+      setFeedback({
+        isCorrect: false,
+        msg: "哎呀！小熊被資料怪獸絆倒了 💥",
+        explanation: currentQuestion.explanation
+      });
+    }
+    setGameState('result');
+  };
+
+  const nextQuestion = () => {
+    if (hp <= 0) {
+      setGameState('end');
+      setBearEmotion('😵');
+      return;
+    }
+    
+    if (currentQIndex + 1 < shuffledQuestions.length) {
+      setCurrentQIndex(prev => prev + 1);
+      setBearEmotion('🐻');
+      setGameState('playing');
+      setFeedback(null);
+    } else {
+      setGameState('end');
+      setBearEmotion('🧸'); 
+    }
+  };
+
+  // --- UI Components ---
+
+  const StartScreen = () => (
+    <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-gradient-to-b from-amber-100 to-amber-300 rounded-3xl shadow-xl">
+      <div className="text-8xl mb-4 animate-bounce">🐻</div>
+      <h1 className="text-3xl font-extrabold text-amber-800 mb-2">數據小熊熊歷險記</h1>
+      <p className="text-amber-900 mb-6 font-medium px-4">
+        L22203 數據處理技術與工具<br/>陪著小熊一起整理特徵，打敗考試魔王！
+      </p>
+      
+      <div className="flex flex-col w-full max-w-sm gap-3">
+        <button 
+          onClick={() => {
+            setCurrentGalleryIndex(0);
+            setBearEmotion('🤩');
+            setGameState('gallery');
+          }}
+          className="w-full px-6 py-4 bg-sky-500 text-white font-bold text-lg rounded-2xl shadow-lg hover:bg-sky-600 hover:scale-105 transition-all relative overflow-hidden group"
+        >
+          <span className="absolute -top-2 -right-2 text-2xl group-hover:animate-ping">✨</span>
+          🖼️ 熊熊圖解教室 <span className="text-sm block font-normal mt-1">9 張超難記名詞秒懂圖卡</span>
+        </button>
+
+        <button 
+          onClick={() => {
+            setCurrentTutorialIndex(0);
+            setBearEmotion('🤓');
+            setGameState('tutorial');
+          }}
+          className="w-full px-6 py-4 bg-emerald-500 text-white font-bold rounded-2xl shadow-lg hover:bg-emerald-600 hover:scale-105 transition-all"
+        >
+          📖 讀「熊之卷」總整理
+        </button>
+
+        <button 
+          onClick={initGame}
+          className="w-full px-6 py-4 bg-amber-600 text-white font-bold rounded-2xl shadow-lg hover:bg-amber-700 hover:scale-105 transition-all"
+        >
+          🚀 進入實戰測驗
+        </button>
+      </div>
+    </div>
+  );
+
+  const GalleryScreen = () => {
+    const vc = visualConcepts[currentGalleryIndex];
+    return (
+      <div className={`flex flex-col h-full rounded-3xl shadow-xl p-4 md:p-8 border-4 ${vc.theme} bg-white transition-colors duration-500`}>
+        <div className="flex justify-between items-center mb-2">
+          <button 
+            onClick={() => setGameState('start')}
+            className={`font-bold hover:opacity-70 ${vc.textTheme}`}
+          >
+            ← 返回森林
+          </button>
+          <div className={`font-bold px-4 py-2 rounded-full shadow-sm bg-white border-2 ${vc.theme} ${vc.textTheme}`}>
+            圖解 {currentGalleryIndex + 1} / {visualConcepts.length}
+          </div>
+        </div>
+
+        <div className={`flex-grow flex flex-col items-center justify-center text-center p-2 rounded-2xl ${vc.theme} bg-opacity-20`}>
+          <span className="text-sm font-black uppercase tracking-widest bg-white px-3 py-1 rounded-full shadow-sm mb-4">
+            {vc.chapter}
+          </span>
+          <h2 className={`text-3xl md:text-4xl font-black mb-2 ${vc.textTheme}`}>
+            {vc.title}
+          </h2>
+          
+          {/* 視覺圖示區 */}
+          <div className="w-full bg-white rounded-2xl shadow-inner my-4 min-h-[160px] flex items-center justify-center overflow-hidden">
+             {vc.visual}
+          </div>
+
+          <p className="text-sm md:text-base font-medium text-slate-700 leading-relaxed text-left bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            {vc.description}
+          </p>
+          
+          <div className="mt-3 w-full text-left bg-amber-50 p-3 md:p-4 rounded-xl border-2 border-amber-200">
+            <p className="text-amber-800 font-bold leading-relaxed text-sm md:text-base">
+              {vc.bearTip}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex justify-between gap-3 mt-4">
+          <button
+            onClick={() => setCurrentGalleryIndex(prev => Math.max(0, prev - 1))}
+            disabled={currentGalleryIndex === 0}
+            className={`px-6 py-3 font-bold rounded-xl transition-all ${currentGalleryIndex === 0 ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-white text-slate-700 shadow-sm hover:bg-slate-100 border border-slate-300'}`}
+          >
+            上一張
+          </button>
+          
+          {currentGalleryIndex < visualConcepts.length - 1 ? (
+            <button
+              onClick={() => setCurrentGalleryIndex(prev => Math.min(visualConcepts.length - 1, prev + 1))}
+              className={`px-6 py-3 text-white font-bold rounded-xl shadow-md transition-all flex-grow text-center ${vc.textTheme.replace('text', 'bg')} hover:opacity-80`}
+            >
+              下一張 ➡️
+            </button>
+          ) : (
+            <button
+              onClick={() => setGameState('start')}
+              className="px-6 py-3 bg-sky-500 text-white font-bold rounded-xl shadow-md hover:bg-sky-600 transition-all flex-grow text-center animate-pulse"
+            >
+              ✨ 我記住了！回首頁
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const TutorialScreen = () => {
+    const t = tutorials[currentTutorialIndex];
+    return (
+      <div className="flex flex-col h-full bg-emerald-50 rounded-3xl shadow-xl p-4 md:p-8 border-4 border-emerald-100">
+        <div className="flex justify-between items-center mb-4">
+          <button 
+            onClick={() => setGameState('start')}
+            className="text-emerald-700 font-bold hover:text-emerald-900 bg-emerald-100 px-4 py-2 rounded-lg"
+          >
+            ← 返回森林
+          </button>
+          <div className="font-bold text-emerald-800 bg-emerald-200 px-4 py-2 rounded-full shadow-sm">
+            進度 {currentTutorialIndex + 1} / {tutorials.length}
+          </div>
+        </div>
+
+        <div className="flex justify-center mb-2">
+          <div className="text-7xl drop-shadow-md">{bearEmotion}</div>
+        </div>
+
+        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-md border-b-4 border-emerald-300 flex-grow overflow-y-auto mb-6">
+          <h2 className="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3 border-b-2 border-emerald-100 pb-3">
+            <span className="text-4xl">{t.icon}</span>
+            {t.title}
+          </h2>
+          <div className="space-y-4">
+            {t.content.map((point, idx) => (
+              <p key={idx} className="text-lg text-slate-700 leading-relaxed font-medium bg-emerald-50/70 p-4 rounded-xl border border-emerald-100 shadow-sm">
+                {point}
+              </p>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-between gap-3">
+          <button
+            onClick={() => setCurrentTutorialIndex(prev => Math.max(0, prev - 1))}
+            disabled={currentTutorialIndex === 0}
+            className={`px-6 py-3 font-bold rounded-xl transition-all ${currentTutorialIndex === 0 ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-white text-emerald-700 shadow-sm hover:bg-emerald-100 border border-emerald-200'}`}
+          >
+            上一頁
+          </button>
+          
+          {currentTutorialIndex < tutorials.length - 1 ? (
+            <button
+              onClick={() => setCurrentTutorialIndex(prev => Math.min(tutorials.length - 1, prev + 1))}
+              className="px-6 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-md hover:bg-emerald-600 transition-all flex-grow text-center"
+            >
+              下一頁 ➡️
+            </button>
+          ) : (
+            <button
+              onClick={initGame}
+              className="px-6 py-3 bg-amber-500 text-white font-bold rounded-xl shadow-md hover:bg-amber-600 transition-all flex-grow text-center animate-pulse"
+            >
+              🐾 熊熊準備好打怪了！
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const PlayingScreen = () => {
+    const q = shuffledQuestions[currentQIndex];
+    return (
+      <div className="flex flex-col h-full bg-amber-50 rounded-3xl shadow-xl p-4 md:p-8 border-4 border-amber-100">
+        <div className="flex justify-between items-center mb-6 bg-white p-3 rounded-2xl shadow-sm border-2 border-amber-200">
+          <div className="flex space-x-1 text-2xl">
+            {[...Array(3)].map((_, i) => (
+              <span key={i} className={i < hp ? 'opacity-100 drop-shadow-sm' : 'opacity-30 grayscale'}>❤️</span>
+            ))}
+          </div>
+          <div className="font-bold text-amber-700 text-xl bg-amber-100 px-4 py-1 rounded-full">
+            🍯 蜂蜜: {score}
+          </div>
+        </div>
+
+        <div className="flex justify-center mb-6">
+          <div className="text-8xl transition-all duration-300 hover:scale-110 cursor-pointer drop-shadow-lg">
+            {bearEmotion}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-md border-b-4 border-amber-300 mb-6 flex-grow flex flex-col justify-center relative overflow-hidden">
+           <div className="absolute top-0 right-0 opacity-5 text-9xl -mt-4 -mr-4 pointer-events-none">🐻</div>
+          <div className="text-sm text-amber-500 font-bold mb-2 uppercase tracking-widest">挑戰關卡 {currentQIndex + 1} / {questions.length}</div>
+          <h2 className="text-xl font-bold text-slate-800 leading-relaxed z-10">
+            {q.text}
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {q.options.map((opt, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleAnswer(idx)}
+              className="p-4 bg-yellow-50/80 hover:bg-amber-100 border-2 border-amber-200 rounded-xl text-left font-bold text-slate-700 transition-all hover:-translate-y-1 hover:shadow-md active:translate-y-0"
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const ResultScreen = () => (
+    <div className={`flex flex-col h-full rounded-3xl shadow-xl p-6 md:p-8 text-center justify-center transition-all ${feedback.isCorrect ? 'bg-emerald-50 border-4 border-emerald-300' : 'bg-rose-50 border-4 border-rose-300'}`}>
+      <div className="text-9xl mb-6 animate-pulse drop-shadow-xl">{bearEmotion}</div>
+      
+      <h2 className={`text-3xl font-extrabold mb-4 ${feedback.isCorrect ? 'text-emerald-700' : 'text-rose-600'}`}>
+        {feedback.msg}
+      </h2>
+      
+      <div className="bg-white p-6 rounded-2xl shadow-sm mb-8 text-left border-l-4 border-slate-300">
+        <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-2">
+           <span>🐾</span> 知識點解析
+        </h3>
+        <p className="text-lg font-medium text-slate-800 leading-relaxed">
+          {feedback.explanation}
+        </p>
+      </div>
+
+      <button 
+        onClick={nextQuestion}
+        className={`px-8 py-4 font-bold rounded-full shadow-lg text-white transition-all hover:scale-105 active:scale-95 ${feedback.isCorrect ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600'}`}
+      >
+        {hp <= 0 ? '小熊累了，遊戲結束 🤕' : (currentQIndex + 1 === questions.length ? '查看結算成績 🏆' : '繼續前進 🐾')}
+      </button>
+    </div>
+  );
+
+  const EndScreen = () => {
+    const isWin = hp > 0;
+    const isPerfect = score === questions.length * 10;
+    
+    let endMessage = "";
+    let endMascot = "";
+    
+    if (isPerfect) {
+      endMessage = "滿分通關！你已經是特徵工程大師熊了！";
+      endMascot = "👑🧸👑";
+    } else if (isWin) {
+      endMessage = "恭喜通關！大部分的特徵魔法都掌握囉！";
+      endMascot = "🎉🐻🎉";
+    } else {
+      endMessage = "被陷阱打敗了...沒關係，去圖解教室補血吧！";
+      endMascot = "🩹🤕🩹";
+    }
+
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-gradient-to-b from-amber-200 to-orange-300 rounded-3xl shadow-xl border-4 border-amber-100">
+        <div className="text-8xl mb-6 drop-shadow-xl">{endMascot}</div>
+        <h1 className="text-4xl font-extrabold text-amber-900 mb-2">探險結束</h1>
+        <p className="text-xl font-bold text-amber-800 mb-6">{endMessage}</p>
+        
+        <div className="bg-white/90 p-6 rounded-2xl shadow-md mb-8 w-full max-w-sm border-2 border-amber-100">
+          <div className="flex justify-between items-center mb-4 pb-4 border-b-2 border-amber-100">
+            <span className="text-slate-600 font-bold text-lg">總獲得蜂蜜:</span>
+            <span className="text-3xl font-black text-amber-600">{score} 分</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-600 font-bold text-lg">剩餘生命值:</span>
+            <span className="text-2xl drop-shadow-sm">{[...Array(hp)].map((_, i) => '❤️').join('') || '💔'}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm justify-center">
+           <button 
+            onClick={() => {
+              setCurrentGalleryIndex(0);
+              setBearEmotion('🤩');
+              setGameState('gallery');
+            }}
+            className="px-6 py-3 bg-sky-500 text-white font-bold rounded-full shadow-md hover:bg-sky-600 transition-all"
+          >
+            🖼️ 看圖解複習
+          </button>
+          <button 
+            onClick={() => setGameState('start')}
+            className="px-6 py-3 bg-amber-600 text-white font-bold rounded-full shadow-md hover:bg-amber-700 transition-all"
+          >
+            🏠 回森林首頁
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-stone-100 flex items-center justify-center p-4 font-sans">
+      <div className="w-full max-w-2xl h-[700px] bg-white rounded-3xl shadow-2xl p-2 relative overflow-hidden">
+        {gameState === 'start' && <StartScreen />}
+        {gameState === 'gallery' && <GalleryScreen />}
+        {gameState === 'tutorial' && <TutorialScreen />}
+        {gameState === 'playing' && <PlayingScreen />}
+        {gameState === 'result' && <ResultScreen />}
+        {gameState === 'end' && <EndScreen />}
+      </div>
+    </div>
+  );
+}
