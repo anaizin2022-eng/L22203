@@ -48,7 +48,7 @@
         content: [
           "📊 Min-Max (最小-最大)：壓縮到 [0,1] 之間，對『極端值』超敏感！",
           "📊 Z-score (標準化)：平均為0，標準差為1。適合常態分佈資料。",
-          "🛡️ 穩健標準化 (Robust Scaling)：用中位數與四分位距(IQR)。專門對付『極端值』(如月薪一億的老闆)！",
+          "🛡️ 穩健標準化 (Robust Scaling)：用中位數與四分位距(IQR)。專門對付『極端值』(如月薪一兆的老闆)！",
           "📦 分箱 (Binning)：把連續數值(年齡)切成離散區間(青年/中年)，讓模型更穩定、更好解釋。"
         ]
       },
@@ -70,12 +70,12 @@
         ]
       },
       {
-        id: 6, title: "第六課：分散式處理四大天王", icon: "⚡",
+        id: 6, title: "第六課：分散式處理四種蜂蜜", icon: "🍯",
         content: [
-          "🐘 Hadoop (MapReduce)：老牌『批次處理』，寫入硬碟，慢但很穩。",
-          "✨ Spark：『記憶體』內運算，速度超快！批次為主，微批次串流。",
-          "🌊 Flink：為『即時串流』而生！刷卡防詐騙、秒級警報必選它！",
-          "🌉 Beam：統一批次與串流的『抽象層』，寫一次程式可跨平台執行。"
+          "🐘 Hadoop (老牌蜂蜜)：『批次處理』，寫入硬碟，慢但很穩。",
+          "✨ Spark (極速蜂蜜)：『記憶體』內運算，速度超快！批次為主，微批次串流。",
+          "🌊 Flink (衝浪蜂蜜)：為『即時串流』而生！刷卡防詐騙、秒級警報必選它！",
+          "🌉 Beam (百搭蜂蜜)：統一批次與串流的『抽象層』，寫一次程式可跨平台執行。"
         ]
       }
     ];
@@ -83,18 +83,49 @@
     // --- 熊熊圖解教室：視覺化超難記名詞 ---
     const visualConcepts = [
       {
+        id: "binning",
+        title: "分箱 (Binning)",
+        chapter: "數值轉換魔法",
+        theme: "bg-lime-100 border-lime-400",
+        textTheme: "text-lime-800",
+        visual: (
+          <div className="flex flex-col items-center justify-center space-y-4 my-4 w-full">
+            <div className="flex space-x-2 md:space-x-4 text-sm md:text-lg font-bold text-slate-600 bg-white p-3 rounded-lg border-2 border-slate-200 shadow-sm">
+              <span>5歲</span> <span>12歲</span> <span>25歲</span> <span>65歲</span>
+            </div>
+            <span className="text-4xl animate-bounce text-lime-500">⬇️</span>
+            <div className="flex space-x-2 md:space-x-4">
+              <div className="flex flex-col items-center bg-lime-200 p-3 rounded-xl border-2 border-lime-400 shadow-sm hover:scale-110 transition-transform">
+                 <span className="text-3xl">📦</span>
+                 <span className="font-black mt-1 text-lime-800 text-sm md:text-base">兒童箱</span>
+              </div>
+              <div className="flex flex-col items-center bg-lime-300 p-3 rounded-xl border-2 border-lime-500 shadow-sm hover:scale-110 transition-transform">
+                 <span className="text-3xl">📦</span>
+                 <span className="font-black mt-1 text-lime-800 text-sm md:text-base">青年箱</span>
+              </div>
+              <div className="flex flex-col items-center bg-lime-400 p-3 rounded-xl border-2 border-lime-600 shadow-sm hover:scale-110 transition-transform">
+                 <span className="text-3xl">📦</span>
+                 <span className="font-black mt-1 text-lime-800 text-sm md:text-base">長者箱</span>
+              </div>
+            </div>
+          </div>
+        ),
+        description: "講義上寫的「連續數值轉離散區間」是不是很像天書？🐻 小熊白話文來了：其實就是把一堆零碎的數字（例如精準的歲數）直接『分類裝箱』！不管你是 5 歲還是 11 歲，全部丟進『兒童箱』貼上同一個大標籤。因為有時候差那一兩歲根本沒差，這樣做反而能濾掉雜訊，讓模型更容易看懂大趨勢！",
+        bearTip: "🐻 熊熊記憶法：就像去買熊熊毛衣，老闆才不量你精準腰圍，直接霸氣幫你套 S、M、L、XL 號，簡單粗暴但超好用！"
+      },
+      {
         id: "interaction",
         title: "交互特徵 (Interaction)",
         chapter: "特徵工程",
         theme: "bg-blue-100 border-blue-300",
         textTheme: "text-blue-800",
         visual: (
-          <div className="flex items-center justify-center space-x-4 text-5xl my-6">
-            <div className="flex flex-col items-center"><span className="text-6xl">🛒</span><span className="text-sm font-bold mt-2">頻率</span></div>
+          <div className="flex items-center justify-center space-x-2 md:space-x-4 text-3xl md:text-5xl my-6">
+            <div className="flex flex-col items-center"><span className="text-5xl md:text-6xl">🛒</span><span className="text-sm font-bold mt-2">頻率</span></div>
             <span className="font-black text-blue-500">×</span>
-            <div className="flex flex-col items-center"><span className="text-6xl">💰</span><span className="text-sm font-bold mt-2">單價</span></div>
+            <div className="flex flex-col items-center"><span className="text-5xl md:text-6xl">💰</span><span className="text-sm font-bold mt-2">單價</span></div>
             <span className="font-black text-blue-500">=</span>
-            <div className="flex flex-col items-center"><span className="text-7xl animate-bounce">📈</span><span className="text-sm font-bold mt-2 text-blue-600">總價值</span></div>
+            <div className="flex flex-col items-center"><span className="text-6xl md:text-7xl animate-bounce">📈</span><span className="text-sm font-bold mt-2 text-blue-600">總價值</span></div>
           </div>
         ),
         description: "單看「購買次數」或「單價」看不出潛力？把它們相乘或相除，衍生出新的「總貢獻度」！這就是交互特徵，幫模型找出隱藏的非線性關係。",
@@ -108,11 +139,11 @@
         textTheme: "text-purple-800",
         visual: (
           <div className="flex flex-col items-center justify-center space-y-4 my-6">
-            <div className="flex items-center space-x-2 text-4xl">
+            <div className="flex items-center space-x-2 text-2xl md:text-4xl">
               <span>🦊</span> <span className="text-sm font-bold mx-2">VS</span> <span>🐰🐰🐰🐰🐰</span>
             </div>
-            <div className="text-2xl font-black text-purple-500">⬇️ SMOTE 魔法 ⬇️</div>
-            <div className="flex items-center space-x-2 text-4xl bg-purple-200 p-3 rounded-2xl">
+            <div className="text-xl md:text-2xl font-black text-purple-500">⬇️ SMOTE 魔法 ⬇️</div>
+            <div className="flex items-center space-x-2 text-2xl md:text-4xl bg-purple-200 p-3 rounded-2xl">
               <span>🦊<span className="opacity-50">🦊🦊</span></span> <span className="text-sm font-bold mx-2">VS</span> <span>🐰🐰🐰🐰🐰</span>
             </div>
           </div>
@@ -127,16 +158,16 @@
         theme: "bg-stone-200 border-stone-400",
         textTheme: "text-stone-800",
         visual: (
-          <div className="flex items-center justify-center space-x-4 text-5xl my-8">
-            <div className="flex flex-col items-center"><span className="text-6xl">📊</span><span className="text-sm font-bold mt-2">100個特徵</span></div>
+          <div className="flex items-center justify-center space-x-2 md:space-x-4 text-3xl md:text-5xl my-8">
+            <div className="flex flex-col items-center"><span className="text-5xl md:text-6xl">📊</span><span className="text-sm font-bold mt-2">100特徵</span></div>
             <span className="font-black text-stone-500 animate-pulse">➡️</span>
             <div className="flex flex-col items-center relative">
-              <span className="text-7xl">🐻</span>
-              <span className="absolute -bottom-2 -right-4 text-5xl">🔎</span>
-              <span className="text-sm font-bold mt-2">純看統計量</span>
+              <span className="text-6xl md:text-7xl">🐻</span>
+              <span className="absolute -bottom-2 -right-4 text-4xl md:text-5xl">🔎</span>
+              <span className="text-sm font-bold mt-2">純看統計</span>
             </div>
             <span className="font-black text-stone-500 animate-pulse">➡️</span>
-            <div className="flex flex-col items-center"><span className="text-6xl">🗑️</span><span className="text-sm font-bold mt-2">丟掉垃圾</span></div>
+            <div className="flex flex-col items-center"><span className="text-5xl md:text-6xl">🗑️</span><span className="text-sm font-bold mt-2">丟垃圾</span></div>
           </div>
         ),
         description: "特徵太多時，先用「過濾法」快速篩選。它的特色是完全「不丟進機器學習模型」，純粹用數學統計（如相關係數、卡方檢定）來判斷特徵有沒有用。",
@@ -145,32 +176,32 @@
       {
         id: "spark",
         title: "Apache Spark",
-        chapter: "分散式框架",
+        chapter: "分散式四種蜂蜜",
         theme: "bg-yellow-100 border-yellow-400",
         textTheme: "text-yellow-800",
         visual: (
-          <div className="flex items-center justify-center space-x-6 text-6xl my-8">
+          <div className="flex items-center justify-center space-x-4 md:space-x-6 text-5xl md:text-6xl my-8">
             <div className="flex flex-col items-center">
               <div className="relative">
-                 <span className="text-8xl">🐻</span>
-                 <span className="absolute -top-4 -right-4 text-5xl animate-spin">⚡</span>
+                 <span className="text-7xl md:text-8xl">🐻</span>
+                 <span className="absolute -top-4 -right-4 text-4xl md:text-5xl animate-spin">⚡</span>
               </div>
-              <span className="text-xl font-black mt-2 text-yellow-600 bg-white px-3 py-1 rounded-full border-2 border-yellow-400 shadow-sm">In-memory!</span>
+              <span className="text-lg md:text-xl font-black mt-2 text-yellow-600 bg-white px-3 py-1 rounded-full border-2 border-yellow-400 shadow-sm">In-memory!</span>
             </div>
-            <span className="text-7xl">🧠</span>
+            <span className="text-6xl md:text-7xl">🧠</span>
           </div>
         ),
         description: "傳統 Hadoop 運算時要把資料反覆寫入硬碟(超慢)。Spark 最大賣點就是「記憶體內運算 (In-memory Processing)」，速度直接提升上百倍！主攻批次與微批次串流。",
-        bearTip: "🐻 白話文：把要處理的資料全攤在大桌子上(記憶體)算，不用一直跑去保險箱(硬碟)拿檔案！"
+        bearTip: "🐻 白話文：把要處理的資料全攤在大桌子上(記憶體)算，不用一直跑去保險箱(硬碟)拿檔案！是超極速口味的蜂蜜！"
       },
       {
         id: "flink",
         title: "Apache Flink",
-        chapter: "分散式框架",
+        chapter: "分散式四種蜂蜜",
         theme: "bg-cyan-100 border-cyan-400",
         textTheme: "text-cyan-800",
         visual: (
-          <div className="flex items-center justify-center space-x-2 text-7xl my-8 overflow-hidden rounded-2xl bg-cyan-50 border-4 border-cyan-200 p-4">
+          <div className="flex items-center justify-center space-x-2 text-5xl md:text-7xl my-8 overflow-hidden rounded-2xl bg-cyan-50 border-4 border-cyan-200 p-4">
             <div className="animate-pulse">💧</div>
             <div className="relative animate-bounce">
                <span>🏄‍♂️</span>
@@ -181,7 +212,7 @@
           </div>
         ),
         description: "為「無邊界、不間斷的即時串流 (Real-time Streaming)」而生。延遲極低(毫秒級)，最適合應用在：信用卡一刷，當下立刻判斷是不是盜刷的防詐騙系統。",
-        bearTip: "🐻 白話文：永遠在浪頭上衝浪！資料來一滴就馬上處理一滴，不累積、絕對零延遲！"
+        bearTip: "🐻 白話文：永遠在浪頭上衝浪！資料來一滴就馬上處理一滴，不累積、絕對零延遲！是衝浪口味的蜂蜜！"
       },
       {
         id: "airflow",
@@ -190,13 +221,13 @@
         theme: "bg-teal-100 border-teal-400",
         textTheme: "text-teal-800",
         visual: (
-          <div className="flex items-center justify-center space-x-4 my-8">
+          <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 my-8">
             <div className="text-6xl animate-bounce">⏱️</div>
             <div className="flex flex-col items-center">
-               <span className="text-8xl">🐻</span>
-               <span className="text-lg font-black mt-2 text-teal-700 bg-white px-4 py-1 rounded-full shadow-sm border-2 border-teal-300">總指揮官</span>
+               <span className="text-7xl md:text-8xl">🐻</span>
+               <span className="text-base md:text-lg font-black mt-2 text-teal-700 bg-white px-4 py-1 rounded-full shadow-sm border-2 border-teal-300">總指揮官</span>
             </div>
-            <div className="flex flex-col space-y-2 text-2xl font-bold text-slate-700">
+            <div className="flex flex-col space-y-2 text-xl md:text-2xl font-bold text-slate-700">
                <span className="bg-teal-200 px-4 py-2 rounded-xl flex items-center gap-2"><span>✅</span> 1. 抓資料</span>
                <span className="bg-teal-300 px-4 py-2 rounded-xl flex items-center gap-2"><span>⏳</span> 2. 訓練模型</span>
             </div>
@@ -212,20 +243,20 @@
         theme: "bg-rose-100 border-rose-400",
         textTheme: "text-rose-800",
         visual: (
-          <div className="flex items-end justify-center space-x-4 my-8 relative">
-             <span className="text-5xl">🐻</span>
-             <span className="text-5xl">🐻</span>
-             <span className="text-5xl">🐻</span>
+          <div className="flex items-end justify-center space-x-2 md:space-x-4 my-8 relative">
+             <span className="text-4xl md:text-5xl">🐻</span>
+             <span className="text-4xl md:text-5xl">🐻</span>
+             <span className="text-4xl md:text-5xl">🐻</span>
              <div className="flex flex-col items-center z-10">
-                <span className="text-7xl">👑🐻</span>
-                <span className="text-sm font-black text-rose-600 bg-white px-2 rounded-md mt-1">月薪一億</span>
+                <span className="text-6xl md:text-7xl">👑🐻</span>
+                <span className="text-xs md:text-sm font-black text-rose-600 bg-white px-2 rounded-md mt-1">月薪一兆</span>
              </div>
              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <span className="text-4xl font-black text-rose-400 bg-white/80 px-4 py-2 rounded-full border-4 border-rose-400 animate-pulse transform -rotate-12">🛡️ 中位數防護罩</span>
+                <span className="text-2xl md:text-4xl font-black text-rose-400 bg-white/90 px-4 py-2 rounded-full border-4 border-rose-400 animate-pulse transform -rotate-12">🛡️ 中位數防護罩</span>
              </div>
           </div>
         ),
-        description: "一般的標準化很容易被極端的離群值（例如全公司只有老闆月薪一億）拉歪平均數。穩健標準化改用「中位數與四分位距」，完全無視極端值的干擾！",
+        description: "一般的標準化很容易被極端的離群值（例如全公司只有老闆月薪一兆）拉歪平均數。穩健標準化改用「中位數與四分位距」，完全無視極端值的干擾！",
         bearTip: "🐻 白話文：戴上防護罩，不受那些超級離群值（大老闆）的影響！"
       },
       {
@@ -235,22 +266,22 @@
         theme: "bg-fuchsia-100 border-fuchsia-400",
         textTheme: "text-fuchsia-800",
         visual: (
-          <div className="flex items-center justify-center space-x-2 text-2xl my-8">
-            <div className="flex flex-col text-sm font-bold bg-white p-3 rounded-xl border-2 border-fuchsia-300 shadow-sm">
+          <div className="flex items-center justify-center space-x-2 text-xl md:text-2xl my-8">
+            <div className="flex flex-col text-xs md:text-sm font-bold bg-white p-3 rounded-xl border-2 border-fuchsia-300 shadow-sm">
                <span>郵遞區號 100</span>
                <span>郵遞區號 101</span>
                <span className="text-slate-400">...(上千個)</span>
             </div>
-            <span className="text-4xl animate-pulse text-fuchsia-500">➡️</span>
-            <div className="relative mx-2">
-               <span className="text-7xl">🐻</span>
-               <span className="absolute -bottom-2 -right-2 text-4xl">🎯</span>
+            <span className="text-2xl md:text-4xl animate-pulse text-fuchsia-500">➡️</span>
+            <div className="relative mx-1 md:mx-2">
+               <span className="text-6xl md:text-7xl">🐻</span>
+               <span className="absolute -bottom-2 -right-2 text-3xl md:text-4xl">🎯</span>
             </div>
-            <span className="text-4xl animate-pulse text-fuchsia-500">➡️</span>
-            <div className="flex flex-col text-sm font-bold bg-fuchsia-200 p-3 rounded-xl border-2 border-fuchsia-400 shadow-sm">
+            <span className="text-2xl md:text-4xl animate-pulse text-fuchsia-500">➡️</span>
+            <div className="flex flex-col text-xs md:text-sm font-bold bg-fuchsia-200 p-3 rounded-xl border-2 border-fuchsia-400 shadow-sm">
                <span>房價平均 0.8</span>
                <span>房價平均 0.2</span>
-               <span className="text-fuchsia-800">1 個欄位搞定!</span>
+               <span className="text-fuchsia-800">1 個欄位!</span>
             </div>
           </div>
         ),
@@ -264,7 +295,7 @@
         theme: "bg-orange-100 border-orange-400",
         textTheme: "text-orange-800",
         visual: (
-          <div className="flex flex-col w-full px-4 space-y-4 my-4 text-sm md:text-base">
+          <div className="flex flex-col w-full px-2 md:px-4 space-y-4 my-4 text-xs md:text-sm">
              <div className="bg-white p-3 rounded-xl border-2 border-orange-300 shadow-sm">
                 <div className="font-black text-orange-700 mb-1">🥇 Label Encoding (有順序)</div>
                 <div className="flex items-center justify-between font-bold text-slate-600">
@@ -273,7 +304,7 @@
              </div>
              <div className="bg-orange-200 p-3 rounded-xl border-2 border-orange-400 shadow-sm">
                 <div className="font-black text-orange-800 mb-1">🔥 One-hot Encoding (無順序)</div>
-                <div className="flex items-center justify-between font-bold text-slate-700 text-xs md:text-sm">
+                <div className="flex items-center justify-between font-bold text-slate-700">
                    <span>台北 ➡️ [1, 0, 0]</span> <span>台中 ➡️ [0, 1, 0]</span>
                 </div>
              </div>
@@ -287,7 +318,7 @@
     // --- 測驗題庫資料 ---
     const questions = [
       {
-        id: 1, text: "小熊發現資料裡有月薪一億的大老闆，導致全公司薪水常態化後黏在一起，該用哪種方法縮放特徵？",
+        id: 1, text: "小熊發現資料裡有月薪一兆的大老闆，導致全公司薪水常態化後黏在一起，該用哪種方法縮放特徵？",
         options: ["Min-Max 正規化", "Z-score 標準化", "穩健標準化 (Robust Scaling)", "對數轉換"],
         correct: 2, explanation: "穩健標準化 (Robust Scaling) 拋棄了易受影響的平均數，改用中位數與 IQR，是專門對付極端值的終極武器！"
       },
@@ -302,9 +333,9 @@
         correct: 1, explanation: "SMOTE (Synthetic Minority Oversampling Technique) 是處理不平衡資料、自動合成少數類別樣本的神器！"
       },
       {
-        id: 4, text: "老闆要求做一個「當下一刷卡就立刻警報」的即時防詐騙系統，小熊該幫他選哪種分散式框架？",
+        id: 4, text: "老闆要求做一個「當下一刷卡就立刻警報」的即時防詐騙系統，小熊該幫他選哪一種蜂蜜(分散式框架)？",
         options: ["Apache Hadoop", "Apache Flink", "Apache Airflow", "資料倉儲"],
-        correct: 1, explanation: "看到「即時、當下立刻」，就要選原生支援即時串流(Real-time Streaming)的 Apache Flink。Hadoop 只能做批次。"
+        correct: 1, explanation: "看到「即時、當下立刻」，就要選原生支援即時串流(Real-time Streaming)的 Apache Flink (衝浪口味蜂蜜)。Hadoop 只能做批次。"
       },
       {
         id: 5, text: "小熊想「不靠模型」，純粹用統計的「相關係數」來快速篩選特徵，這叫做什麼特徵選擇法？",
@@ -322,7 +353,7 @@
         correct: 2, explanation: "透過現有特徵間的數學運算（如乘積、除法）產生新特徵，稱為交互特徵，能幫模型抓出非線性關係。"
       },
       {
-        id: 8, text: "哪一種分散式框架的特色是採用「記憶體內運算 (In-memory)」？",
+        id: 8, text: "哪一種分散式框架(蜂蜜)的特色是採用「記憶體內運算 (In-memory)」，處理速度超級快？",
         options: ["Apache Flink", "Apache Beam", "Apache Spark", "Apache Airflow"],
         correct: 2, explanation: "Apache Spark 的最大賣點就是 In-memory Processing，速度極快，且內建 MLlib 可以直接做機器學習。"
       },
@@ -334,12 +365,12 @@
       {
         id: 10, text: "資料處理管線中，把大任務切碎、定期啟動，並確保「當掉時能自動重試」，這需要哪種管線工具來指揮？",
         options: ["Apache Airflow", "Apache Hadoop", "SMOTE", "Redis"],
-        correct: 0, explanation: "Apache Airflow 是最著名的資料處理管線(Pipeline)自動化排程與監控工具，適合大規模複雜協作。"
+        correct: 0, explanation: "Apache Airflow 是最著名的資料處理管線(Pipeline)自動化排程與監控工具，就像總指揮官負責協調大家。"
       }
     ];
 
     function BearGame() {
-      const [gameState, setGameState] = useState('start'); // start, tutorial, gallery, playing, result, end
+      const [gameState, setGameState] = useState('start'); 
       const [currentQIndex, setCurrentQIndex] = useState(0);
       const [currentTutorialIndex, setCurrentTutorialIndex] = useState(0);
       const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
@@ -420,7 +451,7 @@
               className="w-full px-6 py-4 bg-sky-500 text-white font-bold text-lg rounded-2xl shadow-lg hover:bg-sky-600 hover:scale-105 transition-all relative overflow-hidden group"
             >
               <span className="absolute -top-2 -right-2 text-2xl group-hover:animate-ping">✨</span>
-              🖼️ 熊熊圖解教室 <span className="text-sm block font-normal mt-1">9 張超難記名詞秒懂圖卡</span>
+              🖼️ 熊熊圖解教室 <span className="text-sm block font-normal mt-1">10 張超難記名詞秒懂圖卡</span>
             </button>
 
             <button 
@@ -448,7 +479,8 @@
         const vc = visualConcepts[currentGalleryIndex];
         return (
           <div className={`flex flex-col h-full rounded-3xl shadow-xl p-4 md:p-8 border-4 ${vc.theme} bg-white transition-colors duration-500`}>
-            <div className="flex justify-between items-center mb-2">
+            {/* Header - Fixed */}
+            <div className="flex justify-between items-center mb-4 flex-shrink-0">
               <button 
                 onClick={() => setGameState('start')}
                 className={`font-bold hover:opacity-70 ${vc.textTheme}`}
@@ -460,30 +492,32 @@
               </div>
             </div>
 
-            <div className={`flex-grow flex flex-col items-center justify-center text-center p-2 rounded-2xl ${vc.theme} bg-opacity-20`}>
-              <span className="text-sm font-black uppercase tracking-widest bg-white px-3 py-1 rounded-full shadow-sm mb-4">
+            {/* Scrollable Content Area */}
+            <div className={`flex-grow flex flex-col items-center justify-start text-center p-4 rounded-2xl ${vc.theme} bg-opacity-20 overflow-y-auto`}>
+              <span className="text-sm font-black uppercase tracking-widest bg-white px-3 py-1 rounded-full shadow-sm mb-4 shrink-0">
                 {vc.chapter}
               </span>
-              <h2 className={`text-3xl md:text-4xl font-black mb-2 ${vc.textTheme}`}>
+              <h2 className={`text-3xl md:text-4xl font-black mb-2 shrink-0 ${vc.textTheme}`}>
                 {vc.title}
               </h2>
               
-              <div className="w-full bg-white rounded-2xl shadow-inner my-4 min-h-[160px] flex items-center justify-center overflow-hidden">
+              <div className="w-full bg-white rounded-2xl shadow-inner my-4 min-h-[160px] flex items-center justify-center overflow-hidden shrink-0">
                  {vc.visual}
               </div>
 
-              <p className="text-sm md:text-base font-medium text-slate-700 leading-relaxed text-left bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+              <p className="text-sm md:text-base font-medium text-slate-700 leading-relaxed text-left bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0">
                 {vc.description}
               </p>
               
-              <div className="mt-3 w-full text-left bg-amber-50 p-3 md:p-4 rounded-xl border-2 border-amber-200">
+              <div className="mt-4 w-full text-left bg-amber-50 p-4 rounded-xl border-2 border-amber-200 shrink-0">
                 <p className="text-amber-800 font-bold leading-relaxed text-sm md:text-base">
                   {vc.bearTip}
                 </p>
               </div>
             </div>
 
-            <div className="flex justify-between gap-3 mt-4">
+            {/* Footer Buttons - Fixed at bottom */}
+            <div className="flex justify-between gap-3 mt-4 flex-shrink-0">
               <button
                 onClick={() => setCurrentGalleryIndex(prev => Math.max(0, prev - 1))}
                 disabled={currentGalleryIndex === 0}
@@ -516,7 +550,7 @@
         const t = tutorials[currentTutorialIndex];
         return (
           <div className="flex flex-col h-full bg-emerald-50 rounded-3xl shadow-xl p-4 md:p-8 border-4 border-emerald-100">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 flex-shrink-0">
               <button 
                 onClick={() => setGameState('start')}
                 className="text-emerald-700 font-bold hover:text-emerald-900 bg-emerald-100 px-4 py-2 rounded-lg"
@@ -528,7 +562,7 @@
               </div>
             </div>
 
-            <div className="flex justify-center mb-2">
+            <div className="flex justify-center mb-2 flex-shrink-0">
               <div className="text-7xl drop-shadow-md">{bearEmotion}</div>
             </div>
 
@@ -546,7 +580,7 @@
               </div>
             </div>
 
-            <div className="flex justify-between gap-3">
+            <div className="flex justify-between gap-3 flex-shrink-0">
               <button
                 onClick={() => setCurrentTutorialIndex(prev => Math.max(0, prev - 1))}
                 disabled={currentTutorialIndex === 0}
@@ -579,7 +613,7 @@
         const q = shuffledQuestions[currentQIndex];
         return (
           <div className="flex flex-col h-full bg-amber-50 rounded-3xl shadow-xl p-4 md:p-8 border-4 border-amber-100">
-            <div className="flex justify-between items-center mb-6 bg-white p-3 rounded-2xl shadow-sm border-2 border-amber-200">
+            <div className="flex justify-between items-center mb-6 bg-white p-3 rounded-2xl shadow-sm border-2 border-amber-200 flex-shrink-0">
               <div className="flex space-x-1 text-2xl">
                 {[...Array(3)].map((_, i) => (
                   <span key={i} className={i < hp ? 'opacity-100 drop-shadow-sm' : 'opacity-30 grayscale'}>❤️</span>
@@ -590,21 +624,21 @@
               </div>
             </div>
 
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-6 flex-shrink-0">
               <div className="text-8xl transition-all duration-300 hover:scale-110 cursor-pointer drop-shadow-lg">
                 {bearEmotion}
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-md border-b-4 border-amber-300 mb-6 flex-grow flex flex-col justify-center relative overflow-hidden">
+            <div className="bg-white p-6 rounded-2xl shadow-md border-b-4 border-amber-300 mb-6 flex-grow flex flex-col justify-center relative overflow-y-auto">
                <div className="absolute top-0 right-0 opacity-5 text-9xl -mt-4 -mr-4 pointer-events-none">🐻</div>
-              <div className="text-sm text-amber-500 font-bold mb-2 uppercase tracking-widest">挑戰關卡 {currentQIndex + 1} / {questions.length}</div>
+              <div className="text-sm text-amber-500 font-bold mb-2 uppercase tracking-widest z-10">挑戰關卡 {currentQIndex + 1} / {questions.length}</div>
               <h2 className="text-xl font-bold text-slate-800 leading-relaxed z-10">
                 {q.text}
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-shrink-0">
               {q.options.map((opt, idx) => (
                 <button
                   key={idx}
@@ -620,14 +654,14 @@
       };
 
       const ResultScreen = () => (
-        <div className={`flex flex-col h-full rounded-3xl shadow-xl p-6 md:p-8 text-center justify-center transition-all ${feedback.isCorrect ? 'bg-emerald-50 border-4 border-emerald-300' : 'bg-rose-50 border-4 border-rose-300'}`}>
-          <div className="text-9xl mb-6 animate-pulse drop-shadow-xl">{bearEmotion}</div>
+        <div className={`flex flex-col h-full rounded-3xl shadow-xl p-6 md:p-8 text-center justify-center transition-all overflow-y-auto ${feedback.isCorrect ? 'bg-emerald-50 border-4 border-emerald-300' : 'bg-rose-50 border-4 border-rose-300'}`}>
+          <div className="text-9xl mb-6 animate-pulse drop-shadow-xl shrink-0">{bearEmotion}</div>
           
-          <h2 className={`text-3xl font-extrabold mb-4 ${feedback.isCorrect ? 'text-emerald-700' : 'text-rose-600'}`}>
+          <h2 className={`text-3xl font-extrabold mb-4 shrink-0 ${feedback.isCorrect ? 'text-emerald-700' : 'text-rose-600'}`}>
             {feedback.msg}
           </h2>
           
-          <div className="bg-white p-6 rounded-2xl shadow-sm mb-8 text-left border-l-4 border-slate-300">
+          <div className="bg-white p-6 rounded-2xl shadow-sm mb-8 text-left border-l-4 border-slate-300 shrink-0">
             <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-2">
                <span>🐾</span> 知識點解析
             </h3>
@@ -638,7 +672,7 @@
 
           <button 
             onClick={nextQuestion}
-            className={`px-8 py-4 font-bold rounded-full shadow-lg text-white transition-all hover:scale-105 active:scale-95 ${feedback.isCorrect ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600'}`}
+            className={`px-8 py-4 font-bold rounded-full shadow-lg text-white transition-all hover:scale-105 active:scale-95 shrink-0 ${feedback.isCorrect ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600'}`}
           >
             {hp <= 0 ? '小熊累了，遊戲結束 🤕' : (currentQIndex + 1 === questions.length ? '查看結算成績 🏆' : '繼續前進 🐾')}
           </button>
@@ -664,12 +698,12 @@
         }
 
         return (
-          <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-gradient-to-b from-amber-200 to-orange-300 rounded-3xl shadow-xl border-4 border-amber-100">
-            <div className="text-8xl mb-6 drop-shadow-xl">{endMascot}</div>
-            <h1 className="text-4xl font-extrabold text-amber-900 mb-2">探險結束</h1>
-            <p className="text-xl font-bold text-amber-800 mb-6">{endMessage}</p>
+          <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-gradient-to-b from-amber-200 to-orange-300 rounded-3xl shadow-xl border-4 border-amber-100 overflow-y-auto">
+            <div className="text-8xl mb-6 drop-shadow-xl shrink-0">{endMascot}</div>
+            <h1 className="text-4xl font-extrabold text-amber-900 mb-2 shrink-0">探險結束</h1>
+            <p className="text-xl font-bold text-amber-800 mb-6 shrink-0">{endMessage}</p>
             
-            <div className="bg-white/90 p-6 rounded-2xl shadow-md mb-8 w-full max-w-sm border-2 border-amber-100">
+            <div className="bg-white/90 p-6 rounded-2xl shadow-md mb-8 w-full max-w-sm border-2 border-amber-100 shrink-0">
               <div className="flex justify-between items-center mb-4 pb-4 border-b-2 border-amber-100">
                 <span className="text-slate-600 font-bold text-lg">總獲得蜂蜜:</span>
                 <span className="text-3xl font-black text-amber-600">{score} 分</span>
@@ -680,7 +714,7 @@
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm justify-center shrink-0">
                <button 
                 onClick={() => {
                   setCurrentGalleryIndex(0);
@@ -704,7 +738,7 @@
 
       return (
         <div className="min-h-screen flex items-center justify-center p-4 font-sans">
-          <div className="w-full max-w-2xl h-[700px] bg-white rounded-3xl shadow-2xl p-2 relative overflow-hidden">
+          <div className="w-full max-w-2xl h-[700px] bg-white rounded-3xl shadow-2xl p-2 relative overflow-hidden flex flex-col">
             {gameState === 'start' && <StartScreen />}
             {gameState === 'gallery' && <GalleryScreen />}
             {gameState === 'tutorial' && <TutorialScreen />}
